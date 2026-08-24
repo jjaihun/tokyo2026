@@ -194,19 +194,12 @@ nav{position:fixed;left:0;right:0;bottom:0;z-index:50;display:flex;justify-conte
 
 <section class="page" id="pg-info">
   <div class="card">
-    <div style="font-size:14px;font-weight:700;margin-bottom:4px">항공 · 숙소</div>
-    <table class="inftbl">
-      <tr><td>가는 편</td><td>9/2(수) OZ1085 · 김포 08:40 → 하네다 T3 10:45</td></tr>
-      <tr><td>오는 편</td><td>9/5(토) OZ1086 · 하네다 T3 12:05 → 김포 14:25</td></tr>
-      <tr><td>숙소</td><td>미쓰이가든 호텔 긴자 프리미어<br><a href="https://www.google.com/maps/search/Mitsui%20Garden%20Hotel%20Ginza%20Premier/@35.6671,139.7632,17z" style="color:var(--teal);font-weight:600;font-size:12.5px">지도 열기</a></td></tr>
-    </table>
-  </div>
-  <div class="card">
-    <div style="font-size:14px;font-weight:700;margin-bottom:4px">전시회</div>
-    <table class="inftbl">
-      <tr><td>기프트쇼</td><td>9/2~9/4 · 10:00~18:00 (최종일 17:00)<br>빅사이트 동·서·남 전시동, LIFE×DESIGN관 우선</td></tr>
-      <tr><td>EXTRA<br>PREVIEW</td><td>9/3 오전 · 칸다스퀘어</td></tr>
-    </table>
+    <div class="chead">
+      <div style="font-size:15px;font-weight:700">환율 JPY &#8594; KRW</div>
+      <button class="refbtn" onclick="getFx()">&#8635; 조회</button>
+    </div>
+    <div id="fxout" style="margin-top:12px;font-size:13px;color:var(--sub)">조회를 누르면 환율을 불러와.</div>
+    <div class="cap">기준환율(ER-API) — 실제 카드 결제·환전 환율과 다를 수 있음 · 트래블카드는 대부분 기준환율 근접</div>
   </div>
   <div class="card">
     <div class="chead">
@@ -221,14 +214,20 @@ nav{position:fixed;left:0;right:0;bottom:0;z-index:50;display:flex;justify-conte
     <div class="cap">실시간 조회: Open-Meteo (긴자 기준) · 정밀 확인은 Yahoo!재팬·일본 기상청 링크 이용 · 9월 초는 태풍 가능성 체크</div>
   </div>
   <div class="card">
-    <div class="chead">
-      <div style="font-size:15px;font-weight:700">환율 JPY &#8594; KRW</div>
-      <button class="refbtn" onclick="getFx()">&#8635; 조회</button>
-    </div>
-    <div id="fxout" style="margin-top:12px;font-size:13px;color:var(--sub)">조회를 누르면 환율을 불러와.</div>
-    <div class="cap">기준환율(ER-API) — 실제 카드 결제·환전 환율과 다를 수 있음 · 트래블카드는 대부분 기준환율 근접</div>
+    <div style="font-size:14px;font-weight:700;margin-bottom:4px">항공 · 숙소</div>
+    <table class="inftbl">
+      <tr><td>가는 편</td><td>9/2(수) OZ1085 · 김포 08:40 → 하네다 T3 10:45</td></tr>
+      <tr><td>오는 편</td><td>9/5(토) OZ1086 · 하네다 T3 12:05 → 김포 14:25</td></tr>
+      <tr><td>숙소</td><td>미쓰이가든 호텔 긴자 프리미어<br><a href="https://www.google.com/maps/search/Mitsui%20Garden%20Hotel%20Ginza%20Premier/@35.6671,139.7632,17z" style="color:var(--teal);font-weight:600;font-size:12.5px">지도 열기</a></td></tr>
+    </table>
   </div>
-
+  <div class="card">
+    <div style="font-size:14px;font-weight:700;margin-bottom:4px">전시회</div>
+    <table class="inftbl">
+      <tr><td>기프트쇼</td><td>9/2~9/4 · 10:00~18:00 (최종일 17:00)<br>빅사이트 동·서·남 전시동, LIFE×DESIGN관 우선</td></tr>
+      <tr><td>EXTRA<br>PREVIEW</td><td>9/3 오전 · 칸다스퀘어</td></tr>
+    </table>
+  </div>
   <button class="btn ghost" onclick="resetData()">방문기록·메모 초기화</button>
 </section>
 <footer style="text-align:center;font-size:11px;color:var(--mut);padding:26px 0 6px">© 2026 PlainPod. All rights reserved.</footer>
@@ -417,7 +416,15 @@ function renderEx(){
       +'</div></div>';
   }).join(""):'<div class="empty">조건에 맞는 곳이 없어.<br>필터를 풀거나 다른 정렬을 눌러봐.</div>';
 }
-function score(r){let s=r.p[6]*28-r.w;if(r.st.soon)s-=18;if(r.w>15)s-=(r.w-15)*.6;return s}
+function score(r){
+  const wp=r.w<=12?r.w*1.5:18+(r.w-12)*3;
+  let s=r.p[6]*45-wp;
+  if(r.st.left!==undefined){
+    if(r.st.left<r.w+25)s-=60;
+    else if(r.st.left<90)s+=10;
+  }
+  return s;
+}
 
 const PLAN=[
 ["9/2 수","기프트쇼 + 긴자 집중",[["10:45","하네다 T3 도착 · 에어포터 짐 위탁",""],["12:30~18:00","도쿄 빅사이트 기프트쇼","LIFE×DESIGN관 우선"],["18:40","미쓰이가든 긴자 프리미어 체크인",""],["19:00~21:00","긴자 집중 라운딩","이토야·도버(20시) 먼저 → 긴자식스·빔즈 → 무지·로프트(21시)"]]],
